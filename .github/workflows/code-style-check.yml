@@ -1,0 +1,43 @@
+name: Code Style Check
+
+on:
+  push:
+    branches:
+      - carloslindosogrijota-main
+  pull_request:
+    branches:
+      - carloslindosogrijota-main
+
+jobs:
+  code-style:
+    name: Code Style Check
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Java environment
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17" # Puedes ajustar la versión según tu proyecto
+
+      # Step 3: Download checkstyle.jar
+      - name: Download checkstyle
+        run: wget -O checkstyle.jar https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.20.1/checkstyle-10.20.1-all.jar
+
+      # Step 4: Run checkstyle.jar
+      - name: Run checkstyle
+        run: |
+          java -jar checkstyle.jar -c checkstyle.xml \src | grep --color=always 'ERROR|$'
+
+      # Step 5: [Optional] Upload Checkstyle report for easier debugging
+      - name: Upload Checkstyle Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: checkstyle-report
+          path: target/checkstyle-result.xml
